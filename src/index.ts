@@ -27,33 +27,10 @@ export interface Env {
 // # Delete a user
 // DELETE /rest/users/123
 
-export default {
-    async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-        const app = new Hono<{ Bindings: Env }>();
-
-        // Apply CORS to all routes
-        app.use('*', async (c, next) => {
-            return cors()(c, next);
-        })
-
-        // Secret Store key value that we have set
-        const secret = await env.SECRET.get();
+export
 
         // Authentication middleware that verifies the Authorization header
-        // is sent in on each request and matches the value of our Secret key.
-        // If a match is not found we return a 401 and prevent further access.
-        const authMiddleware = async (c: Context, next: Next) => {
-            const authHeader = c.req.header('Authorization');
-            if (!authHeader) {
-                return c.json({ error: 'Unauthorized' }, 401);
-            }
-
-            const token = authHeader.startsWith('Bearer ')
-                ? authHeader.substring(7)
-                : authHeader;
-
-            if (token !== secret) {
-                return c.json({ error: 'Unauthorized' }, 401);
+        // is sent in on each request and matc
             }
 
             return next();
@@ -66,14 +43,6 @@ export default {
         app.post('/query', authMiddleware, async (c) => {
             try {
                 const body = await c.req.json();
-                const { query, params } = body;
-
-                if (!query) {
-                    return c.json({ error: 'Query is required' }, 400);
-                }
-
-                // Execute the query against D1 database
-                const results = await env.DB.prepare(query)
                     .bind(...(params || []))
                     .all();
 
